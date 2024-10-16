@@ -38,7 +38,7 @@ class MaskedAutoregressive(AbstractBijection):
     """
 
     shape: tuple[int, ...]
-    cond_shape: tuple[int, ...] | None
+    cond_shape: tuple[int, ...]
     transformer_constructor: Callable
     masked_autoregressive_mlp: eqx.nn.MLP
 
@@ -48,7 +48,7 @@ class MaskedAutoregressive(AbstractBijection):
         *,
         transformer: AbstractBijection,
         dim: int,
-        cond_dim: int | None = None,
+        cond_dim: int = None,
         nn_width: int,
         nn_depth: int,
         nn_activation: Callable = jnn.relu,

@@ -14,7 +14,7 @@ from flowjax.wrappers import AbstractUnwrappable, Parameterize
 
 def _real_to_increasing_on_interval(
     arr: Float[Array, " dim"],
-    interval: tuple[int | float, int | float],
+    interval: tuple[float, float],
     softmax_adjust: float = 1e-2,
     *,
     pad_with_ends: bool = True,
@@ -60,12 +60,12 @@ class RationalQuadraticSpline(AbstractBijection):
     """
 
     knots: int
-    interval: tuple[int | float, int | float]
-    softmax_adjust: float | int
+    interval: tuple[float, float]
+    softmax_adjust: float
     min_derivative: float
-    x_pos: Array | AbstractUnwrappable[Array]
-    y_pos: Array | AbstractUnwrappable[Array]
-    derivatives: Array | AbstractUnwrappable[Array]
+    x_pos: AbstractUnwrappable[Array]
+    y_pos: AbstractUnwrappable[Array]
+    derivatives: AbstractUnwrappable[Array]
     shape: ClassVar[tuple] = ()
     cond_shape: ClassVar[None] = None
 
@@ -73,9 +73,9 @@ class RationalQuadraticSpline(AbstractBijection):
         self,
         *,
         knots: int,
-        interval: float | int | tuple[int | float, int | float],
+        interval: float,
         min_derivative: float = 1e-3,
-        softmax_adjust: float | int = 1e-2,
+        softmax_adjust: float = 1e-2,
     ):
         self.knots = knots
         interval = interval if isinstance(interval, tuple) else (-interval, interval)
@@ -127,9 +127,7 @@ class RationalQuadraticSpline(AbstractBijection):
         k = jnp.searchsorted(y_pos, y_robust) - 1
         xk, xk1, yk, yk1 = x_pos[k], x_pos[k + 1], y_pos[k], y_pos[k + 1]
         sk = (yk1 - yk) / (xk1 - xk)
-        y_delta_s_term = (y_robust - yk) * (
-            derivatives[k + 1] + derivatives[k] - 2 * sk
-        )
+        y_delta_s_term = (y_robust - yk) * (derivatives[k + 1] + derivatives[k] - 2 * sk)
         a = (yk1 - yk) * (sk - derivatives[k]) + y_delta_s_term
         b = (yk1 - yk) * derivatives[k] - y_delta_s_term
         c = -sk * (y_robust - yk)

@@ -34,8 +34,8 @@ class MaximumLikelihoodLoss:
         params: AbstractDistribution,
         static: AbstractDistribution,
         x: Array,
-        condition: Array | None = None,
-        key: PRNGKeyArray | None = None,
+        condition: Array = None,
+        key: PRNGKeyArray = None,
     ) -> Float[Array, ""]:
         """Compute the loss. Key is ignored (for consistency of API)."""
         dist = unwrap(eqx.combine(params, static))
@@ -75,7 +75,7 @@ class ContrastiveLoss:
         params: AbstractDistribution,
         static: AbstractDistribution,
         x: Float[Array, "..."],
-        condition: Array | None,
+        condition: Array,
         key: PRNGKeyArray,
     ) -> Float[Array, ""]:
         """Compute the loss."""
@@ -101,7 +101,6 @@ class ContrastiveLoss:
 
 
 def _get_contrastive_idxs(key: PRNGKeyArray, batch_size: int, n_contrastive: int):
-
     @eqx.filter_vmap
     def _get_idxs(key, idx, batch_size, n_contrastive):
         choices = jnp.delete(jnp.arange(batch_size), idx, assume_unique_indices=True)

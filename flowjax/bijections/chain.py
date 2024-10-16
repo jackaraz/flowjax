@@ -16,14 +16,12 @@ class Chain(AbstractBijection):
     """
 
     shape: tuple[int, ...]
-    cond_shape: tuple[int, ...] | None
-    bijections: tuple[AbstractBijection | AbstractUnwrappable[AbstractBijection], ...]
+    cond_shape: tuple[int, ...]
+    bijections: tuple[AbstractUnwrappable[AbstractBijection], ...]
 
     def __init__(
         self,
-        bijections: Sequence[
-            AbstractBijection | AbstractUnwrappable[AbstractBijection]
-        ],
+        bijections: Sequence[AbstractUnwrappable[AbstractBijection]],
     ):
         unwrapped = unwrap(bijections)
         check_shapes_match([b.shape for b in unwrapped])
@@ -55,7 +53,7 @@ class Chain(AbstractBijection):
             log_abs_det_jac += log_abs_det_jac_i.sum()
         return y, log_abs_det_jac
 
-    def __getitem__(self, i: int | slice) -> AbstractBijection:
+    def __getitem__(self, i: int) -> AbstractBijection:
         if isinstance(i, int):
             return self.bijections[i]
         if isinstance(i, slice):

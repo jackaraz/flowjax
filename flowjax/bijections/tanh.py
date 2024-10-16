@@ -53,7 +53,7 @@ class LeakyTanh(AbstractBijection):
     shape: tuple[int, ...] = ()
     cond_shape: ClassVar[None] = None
 
-    def __init__(self, max_val: float | int, shape: tuple[int, ...] = ()):
+    def __init__(self, max_val: float, shape: tuple[int, ...] = ()):
         self.max_val = float(max_val)
         self.linear_grad = math.exp(_tanh_log_grad(max_val))
         self.intercept = math.tanh(max_val) - self.linear_grad * max_val

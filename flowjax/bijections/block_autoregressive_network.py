@@ -73,10 +73,10 @@ class BlockAutoregressiveNetwork(AbstractBijection):
     """
 
     shape: tuple[int, ...]
-    cond_shape: tuple[int, ...] | None
+    cond_shape: tuple[int, ...]
     depth: int
     layers: list
-    cond_linear: eqx.nn.Linear | None
+    cond_linear: eqx.nn.Linear
     block_dim: int
     activation: AbstractBijection
     inverter: Callable
@@ -86,11 +86,11 @@ class BlockAutoregressiveNetwork(AbstractBijection):
         key: PRNGKeyArray,
         *,
         dim: int,
-        cond_dim: int | None = None,
+        cond_dim: int = None,
         depth: int,
         block_dim: int,
-        activation: AbstractBijection | Callable | None = None,
-        inverter: Callable | None = None,
+        activation: Callable = None,
+        inverter: Callable = None,
     ):
         key, subkey = jr.split(key)
 

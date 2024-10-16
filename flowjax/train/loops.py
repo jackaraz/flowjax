@@ -26,7 +26,7 @@ def fit_to_key_based_loss(
     loss_fn: Callable[[PyTree, PyTree, PRNGKeyArray], Scalar],
     steps: int,
     learning_rate: float = 5e-4,
-    optimizer: optax.GradientTransformation | None = None,
+    optimizer: optax.GradientTransformation = None,
     show_progress: bool = True,
 ):
     """Train a pytree, using a loss with params, static and key as arguments.
@@ -80,10 +80,10 @@ def fit_to_data(
     dist: PyTree,  # Custom losses may support broader types than AbstractDistribution
     x: ArrayLike,
     *,
-    condition: ArrayLike | None = None,
-    loss_fn: Callable | None = None,
+    condition: ArrayLike = None,
+    loss_fn: Callable = None,
     learning_rate: float = 5e-4,
-    optimizer: optax.GradientTransformation | None = None,
+    optimizer: optax.GradientTransformation = None,
     max_epochs: int = 100,
     max_patience: int = 5,
     batch_size: int = 100,
@@ -152,7 +152,7 @@ def fit_to_data(
 
         # Train epoch
         batch_losses = []
-        for batch in zip(*get_batches(train_data, batch_size), strict=True):
+        for batch in zip(*get_batches(train_data, batch_size)):
             key, subkey = jr.split(key)
             params, opt_state, loss_i = step(
                 params,
@@ -168,7 +168,7 @@ def fit_to_data(
 
         # Val epoch
         batch_losses = []
-        for batch in zip(*get_batches(val_data, batch_size), strict=True):
+        for batch in zip(*get_batches(val_data, batch_size)):
             key, subkey = jr.split(key)
             loss_i = loss_fn(params, static, *batch, key=subkey)
             batch_losses.append(loss_i)

@@ -22,7 +22,7 @@ def inv_softplus(x: ArrayLike) -> Array:
     return jnp.log(-jnp.expm1(-x)) + x
 
 
-def merge_cond_shapes(shapes: Sequence[tuple[int, ...] | None]):
+def merge_cond_shapes(shapes: Sequence[tuple[int, ...]]):
     """Merges shapes (tuples of ints or None) used in bijections and distributions.
 
     Returns None if all shapes are None, otherwise checks none None shapes match, and
@@ -101,9 +101,7 @@ def get_ravelled_pytree_constructor(tree, filter_spec=eqx.is_inexact_array) -> t
     return constructor, len(init)
 
 
-def arraylike_to_array(
-    arr: ArrayLike | None, err_name: str = "input", **kwargs
-) -> Array:
+def arraylike_to_array(arr: ArrayLike, err_name: str = "input", **kwargs) -> Array:
     """Check the input is arraylike and convert to a JAX Array with ``jnp.asarray``.
 
     Combines ``jnp.asarray``, with an isinstance(arr, ArrayLike) check. This
@@ -116,8 +114,8 @@ def arraylike_to_array(
         err_name: Name of the input in the error message. Defaults to "input".
         **kwargs: Keyword arguments passed to jnp.asarray.
     """
-    if not isinstance(arr, ArrayLike):
-        raise TypeError(
-            f"Expected {err_name} to be arraylike; got {type(arr).__name__}.",
-        )
+    # if not isinstance(arr, ArrayLike):
+    #     raise TypeError(
+    #         f"Expected {err_name} to be arraylike; got {type(arr).__name__}.",
+    #     )
     return jnp.asarray(arr, **kwargs)

@@ -8,6 +8,7 @@ from collections.abc import Callable
 import equinox as eqx
 import jax.nn as jnn
 import jax.numpy as jnp
+import jax.random as jrandom
 from jaxtyping import PRNGKeyArray
 
 from flowjax.bijections.bijection import AbstractBijection
@@ -32,7 +33,7 @@ class Coupling(AbstractBijection):
     """
 
     shape: tuple[int, ...]
-    cond_shape: tuple[int, ...] | None
+    cond_shape: tuple[int, ...]
     untransformed_dim: int
     dim: int
     transformer_constructor: Callable

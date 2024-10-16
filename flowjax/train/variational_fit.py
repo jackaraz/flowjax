@@ -20,7 +20,7 @@ def fit_to_variational_target(
     *,
     steps: int = 100,
     learning_rate: float = 5e-4,
-    optimizer: optax.GradientTransformation | None = None,
+    optimizer: optax.GradientTransformation = None,
     return_best: bool = True,
     show_progress: bool = True,
 ) -> tuple[PyTree, list]:
