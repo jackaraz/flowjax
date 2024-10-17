@@ -64,10 +64,10 @@ class AbstractDistribution(eqx.Module):
     """
 
     shape: AbstractVar[tuple[int, ...]]
-    cond_shape: AbstractVar[tuple[int, ...] | None]
+    cond_shape: AbstractVar[tuple[int, ...]]
 
     @abstractmethod
-    def _log_prob(self, x: Array, condition: Array | None = None) -> Array:
+    def _log_prob(self, x: Array, condition: Array = None) -> Array:
         """Evaluate the log probability of point x.
 
         This method should be be valid for inputs with shapes matching
@@ -76,19 +76,19 @@ class AbstractDistribution(eqx.Module):
         """
 
     @abstractmethod
-    def _sample(self, key: PRNGKeyArray, condition: Array | None = None) -> Array:
+    def _sample(self, key: PRNGKeyArray, condition: Array = None) -> Array:
         """Sample a point from the distribution.
 
         This method should return a single sample with shape matching
         ``distribution.shape``.
         """
 
-    def _sample_and_log_prob(self, key: PRNGKeyArray, condition: Array | None = None):
+    def _sample_and_log_prob(self, key: PRNGKeyArray, condition: Array = None):
         """Sample a point from the distribution, and return its log probability."""
         x = self._sample(key, condition)
         return x, self._log_prob(x, condition)
 
-    def log_prob(self, x: ArrayLike, condition: ArrayLike | None = None) -> Array:
+    def log_prob(self, x: ArrayLike, condition: ArrayLike = None) -> Array:
         """Evaluate the log probability.
 
         Uses numpy-like broadcasting if additional leading dimensions are passed.
@@ -111,7 +111,7 @@ class AbstractDistribution(eqx.Module):
         self,
         key: PRNGKeyArray,
         sample_shape: tuple[int, ...] = (),
-        condition: ArrayLike | None = None,
+        condition: ArrayLike = None,
     ) -> Array:
         """Sample from the distribution.
 
@@ -135,7 +135,7 @@ class AbstractDistribution(eqx.Module):
         self,
         key: PRNGKeyArray,
         sample_shape: tuple[int, ...] = (),
-        condition: ArrayLike | None = None,
+        condition: ArrayLike = None,
     ) -> tuple[Array, Array]:
         """Sample the distribution and return the samples with their log probabilities.
 
@@ -161,7 +161,7 @@ class AbstractDistribution(eqx.Module):
         return len(self.shape)
 
     @property
-    def cond_ndim(self) -> None | int:
+    def cond_ndim(self) -> int:
         """Number of dimensions of the conditioning variable (length of cond_shape)."""
         return None if self.cond_shape is None else len(self.cond_shape)
 
@@ -186,11 +186,7 @@ class AbstractDistribution(eqx.Module):
             @wraps(method)
             def _wrapper(*args, **kwargs):
                 bound = inspect.signature(method).bind(*args, **kwargs)
-                for in_shape, (name, arg) in zip(
-                    in_shapes,
-                    bound.arguments.items(),
-                    strict=False,
-                ):
+                for in_shape, (name, arg) in zip(in_shapes, bound.arguments.items()):
                     if arg.shape != in_shape:
                         raise ValueError(
                             f"Expected trailing dimensions matching {in_shape} for "
@@ -257,7 +253,7 @@ class AbstractTransformed(AbstractDistribution):
     def _sample_and_log_prob(
         self,
         key: PRNGKeyArray,
-        condition: Array | None = None,
+        condition: Array = None,
     ):  # TODO add overide decorator when python>=3.12 is common
         # We override to avoid computing the inverse transformation.
         base_sample, log_prob_base = self.base_dist._sample_and_log_prob(key, condition)
@@ -303,7 +299,7 @@ class AbstractTransformed(AbstractDistribution):
         return self.base_dist.shape
 
     @property
-    def cond_shape(self) -> tuple[int, ...] | None:
+    def cond_shape(self) -> tuple[int, ...]:
         return merge_cond_shapes((self.bijection.cond_shape, self.base_dist.cond_shape))
 
 
@@ -561,7 +557,7 @@ class _StandardStudentT(AbstractDistribution):
 
     shape: tuple[int, ...]
     cond_shape: ClassVar[None] = None
-    df: Array | AbstractUnwrappable[Array]
+    df: Array
 
     def __init__(self, df: ArrayLike):
         df = arraylike_to_array(df, dtype=float)
@@ -720,8 +716,8 @@ class VmapMixture(AbstractDistribution):
     """
 
     shape: tuple[int, ...]
-    cond_shape: tuple[int, ...] | None
-    log_normalized_weights: Array | AbstractUnwrappable[Array]
+    cond_shape: tuple[int, ...]
+    log_normalized_weights: AbstractUnwrappable[Array]
     dist: AbstractDistribution
 
     def __init__(
@@ -750,7 +746,7 @@ class VmapMixture(AbstractDistribution):
 
 
 class _StandardGamma(AbstractDistribution):
-    concentration: Array | AbstractUnwrappable[Array]
+    concentration: AbstractUnwrappable[Array]
     shape: tuple[int, ...]
     cond_shape: ClassVar[None] = None
 
@@ -790,8 +786,8 @@ class Beta(AbstractDistribution):
         beta: The beta shape parameter.
     """
 
-    alpha: Array | AbstractUnwrappable[Array]
-    beta: Array | AbstractUnwrappable[Array]
+    alpha: AbstractUnwrappable[Array]
+    beta: AbstractUnwrappable[Array]
     shape: tuple[int, ...]
     cond_shape: ClassVar[None] = None
 

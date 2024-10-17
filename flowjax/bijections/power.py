@@ -18,7 +18,7 @@ class Power(AbstractBijection):
         shape: The shape of the bijection.
     """
 
-    exponent: int | float
+    exponent: float
     shape: tuple[int, ...] = ()
     cond_shape: ClassVar[None] = None
 

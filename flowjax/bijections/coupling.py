@@ -8,6 +8,7 @@ from collections.abc import Callable
 import equinox as eqx
 import jax.nn as jnn
 import jax.numpy as jnp
+import jax.random as jrandom
 from jaxtyping import PRNGKeyArray
 
 from flowjax import wrappers
@@ -33,7 +34,7 @@ class Coupling(AbstractBijection):
     """
 
     shape: tuple[int, ...]
-    cond_shape: tuple[int, ...] | None
+    cond_shape: tuple[int, ...]
     untransformed_dim: int
     dim: int
     transformer_constructor: Callable
@@ -46,9 +47,8 @@ class Coupling(AbstractBijection):
         transformer: AbstractBijection,
         untransformed_dim: int,
         dim: int,
-        cond_dim: int | None = None,
-        nn_width: int,
-        nn_depth: int,
+        cond_dim: int = None,
+        nn_width: list[int],
         nn_activation: Callable = jnn.relu,
     ):
         if transformer.shape != () or transformer.cond_shape is not None:
@@ -70,16 +70,28 @@ class Coupling(AbstractBijection):
 
         conditioner_output_size = num_params * (dim - untransformed_dim)
 
-        self.conditioner = eqx.nn.MLP(
-            in_size=(
-                untransformed_dim if cond_dim is None else untransformed_dim + cond_dim
-            ),
-            out_size=conditioner_output_size,
-            width_size=nn_width,
-            depth=nn_depth,
-            activation=nn_activation,
-            key=key,
+        if isinstance(nn_width, int):
+            nn_width = [nn_width]
+
+        input_size = (
+            untransformed_dim if cond_dim is None else untransformed_dim + cond_dim
         )
+
+        widths = [input_size] + nn_width + [conditioner_output_size]
+        keys = jrandom.split(key, len(nn_width) + 1)
+        layers = []
+        for idx in range(1, len(widths)):
+            layers.append(
+                eqx.nn.MLP(
+                    in_size=widths[idx - 1],
+                    out_size=widths[idx],
+                    width_size=0,
+                    depth=0,
+                    activation=nn_activation,
+                    key=keys[idx - 1],
+                )
+            )
+        self.conditioner = eqx.nn.Sequential(layers=layers)
 
     def transform(self, x, condition=None):
         x_cond, x_trans = x[: self.untransformed_dim], x[self.untransformed_dim :]

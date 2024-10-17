@@ -29,7 +29,7 @@ class Affine(AbstractBijection):
     shape: tuple[int, ...]
     cond_shape: ClassVar[None] = None
     loc: Array
-    scale: Array | AbstractUnwrappable[Array]
+    scale: AbstractUnwrappable[Array]
 
     def __init__(
         self,
@@ -92,7 +92,7 @@ class Scale(AbstractBijection):
 
     shape: tuple[int, ...]
     cond_shape: ClassVar[None] = None
-    scale: Array | AbstractUnwrappable[Array]
+    scale: AbstractUnwrappable[Array]
 
     def __init__(
         self,
@@ -135,7 +135,7 @@ class TriangularAffine(AbstractBijection):
     shape: tuple[int, ...]
     cond_shape: ClassVar[None] = None
     loc: Array
-    triangular: Array | AbstractUnwrappable[Array]
+    triangular: AbstractUnwrappable[Array]
     lower: bool
 
     def __init__(

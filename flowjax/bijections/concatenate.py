@@ -30,7 +30,7 @@ class Concatenate(AbstractBijection):
     """
 
     shape: tuple[int, ...]
-    cond_shape: tuple[int, ...] | None
+    cond_shape: tuple[int, ...]
     split_idxs: tuple[int, ...]
     bijections: Sequence[AbstractBijection]
     axis: int
@@ -116,7 +116,7 @@ class Stack(AbstractBijection):
     """
 
     shape: tuple[int, ...]
-    cond_shape: tuple[int, ...] | None
+    cond_shape: tuple[int, ...]
     bijections: Sequence[AbstractBijection]
     axis: int
 

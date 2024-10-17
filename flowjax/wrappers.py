@@ -123,7 +123,6 @@ class Parameterize(AbstractUnwrappable[T]):
         self._dummy = jnp.empty((), int)
 
     def unwrap(self) -> T:
-
         def _unwrap_fn(self):
             return self.fn(*self.args, **self.kwargs)
 
@@ -194,10 +193,10 @@ class WeightNormalization(AbstractUnwrappable[Array]):
         weight: The (possibly wrapped) weight matrix.
     """
 
-    weight: Array | AbstractUnwrappable[Array]
-    scale: Array | AbstractUnwrappable[Array] = eqx.field(init=False)
+    weight: AbstractUnwrappable[Array]
+    scale: AbstractUnwrappable[Array] = eqx.field(init=False)
 
-    def __init__(self, weight: Array | AbstractUnwrappable[Array]):
+    def __init__(self, weight: AbstractUnwrappable[Array]):
         self.weight = weight
         scale_init = 1 / jnp.linalg.norm(unwrap(weight), axis=-1, keepdims=True)
         self.scale = Parameterize(softplus, inv_softplus(scale_init))

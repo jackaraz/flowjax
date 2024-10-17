@@ -47,8 +47,8 @@ def coupling_flow(
     key: PRNGKeyArray,
     *,
     base_dist: AbstractDistribution,
-    transformer: AbstractBijection | None = None,
-    cond_dim: int | None = None,
+    transformer: AbstractBijection = None,
+    cond_dim: int = None,
     flow_layers: int = 8,
     nn_width: int = 50,
     nn_depth: int = 1,
@@ -100,8 +100,8 @@ def masked_autoregressive_flow(
     key: PRNGKeyArray,
     *,
     base_dist: AbstractDistribution,
-    transformer: AbstractBijection | None = None,
-    cond_dim: int | None = None,
+    transformer: AbstractBijection = None,
+    cond_dim: int = None,
     flow_layers: int = 8,
     nn_width: int = 50,
     nn_depth: int = 1,
@@ -155,13 +155,13 @@ def block_neural_autoregressive_flow(
     key: PRNGKeyArray,
     *,
     base_dist: AbstractDistribution,
-    cond_dim: int | None = None,
+    cond_dim: int = None,
     nn_depth: int = 1,
     nn_block_dim: int = 8,
     flow_layers: int = 1,
     invert: bool = True,
-    activation: AbstractBijection | Callable | None = None,
-    inverter: Callable | None = None,
+    activation: Callable = None,
+    inverter: Callable = None,
 ) -> Transformed:
     """Block neural autoregressive flow (BNAF) (https://arxiv.org/abs/1904.04676).
 
@@ -216,10 +216,10 @@ def planar_flow(
     key: PRNGKeyArray,
     *,
     base_dist: AbstractDistribution,
-    cond_dim: int | None = None,
+    cond_dim: int = None,
     flow_layers: int = 8,
     invert: bool = True,
-    negative_slope: float | None = None,
+    negative_slope: float = None,
     **mlp_kwargs,
 ) -> Transformed:
     """Planar flow as introduced in https://arxiv.org/pdf/1505.05770.pdf.
@@ -263,12 +263,12 @@ def triangular_spline_flow(
     key: PRNGKeyArray,
     *,
     base_dist: AbstractDistribution,
-    cond_dim: int | None = None,
+    cond_dim: int = None,
     flow_layers: int = 8,
     knots: int = 8,
-    tanh_max_val: float | int = 3.0,
+    tanh_max_val: float = 3.0,
     invert: bool = True,
-    init: Callable | None = None,
+    init: Callable = None,
 ) -> Transformed:
     """Triangular spline flow.
 

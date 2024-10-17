@@ -26,8 +26,8 @@ class AutoregressiveBisectionInverter(eqx.Module):
         max_iter: Maximum number of iterations to use.
     """
 
-    lower: float | int = -10
-    upper: float | int = 10
+    lower: float = -10
+    upper: float = 10
     tol: float = 1e-7
     max_iter: int = 200
 

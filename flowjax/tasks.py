@@ -32,7 +32,7 @@ class GaussianMixtureSimulator:
         x | \theta \sim 0.5 \cdot N(\theta,\ I_2) + 0.5 \cdot N(\theta,\ 0.1^2\odot I_2)
     """
 
-    def __init__(self, dim: int = 2, prior_bound: float | int = 10.0) -> None:
+    def __init__(self, dim: int = 2, prior_bound=10.0) -> None:
         self.dim = dim
         self.prior_bound = prior_bound
         self.prior = Uniform(-jnp.full(dim, prior_bound), jnp.full(dim, prior_bound))

@@ -64,7 +64,7 @@ class Permute(AbstractBijection):
     permutation: tuple[Array, ...]
     inverse_permutation: tuple[Array, ...]
 
-    def __init__(self, permutation: Int[Array | np.ndarray, "..."]):
+    def __init__(self, permutation: Int[np.ndarray, "..."]):
         permutation = arraylike_to_array(permutation, dtype=int)
         permutation = eqx.error_if(
             permutation,
@@ -132,7 +132,7 @@ class Partial(AbstractBijection):
     """
 
     bijection: AbstractBijection
-    idxs: int | slice | Array | tuple
+    idxs: Array
     shape: tuple[int, ...]
 
     def __check_init__(self):
@@ -266,13 +266,13 @@ class Reshape(AbstractBijection):
 
     bijection: AbstractBijection
     shape: tuple[int, ...]
-    cond_shape: tuple[int, ...] | None = None
+    cond_shape: tuple[int, ...] = None
 
     def __init__(
         self,
         bijection: AbstractBijection,
-        shape: tuple[int, ...] | None = None,
-        cond_shape: tuple[int, ...] | None = None,
+        shape: tuple[int, ...] = None,
+        cond_shape: tuple[int, ...] = None,
     ):
         self.bijection = bijection
         self.shape = shape if shape is not None else bijection.shape

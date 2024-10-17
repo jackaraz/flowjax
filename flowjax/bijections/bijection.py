@@ -19,45 +19,6 @@ from flowjax.utils import _get_ufunc_signature, arraylike_to_array
 from flowjax.wrappers import unwrap
 
 
-def _unwrap_check_and_cast(method):
-    """Decorator that unwraps unwrappables, performs argument casting and checking."""
-
-    @functools.wraps(method)
-    def wrapper(
-        bijection: AbstractBijection,
-        x: ArrayLike,
-        condition: ArrayLike | None = None,
-    ):
-        # TODO This can be simplified significantly if we use beartype
-        def _check_condition(condition):
-            if condition is not None:
-                condition = arraylike_to_array(condition, err_name="condition")
-            elif bijection.cond_shape is not None:
-                raise ValueError("Expected condition to be provided.")
-
-            if (
-                bijection.cond_shape is not None
-                and condition.shape != bijection.cond_shape
-            ):
-                raise ValueError(
-                    f"Expected condition.shape {bijection.cond_shape}; got "
-                    f"{condition.shape}",
-                )
-            return condition
-
-        def _check_x(x):
-            x = arraylike_to_array(x)
-            if x.shape != bijection.shape:
-                raise ValueError(
-                    f"Expected input shape {bijection.shape}; got {x.shape}"
-                )
-            return x
-
-        return method(unwrap(bijection), _check_x(x), _check_condition(condition))
-
-    return wrapper
-
-
 class AbstractBijection(eqx.Module):
     """Bijection abstract class.
 
@@ -83,7 +44,7 @@ class AbstractBijection(eqx.Module):
     """
 
     shape: AbstractVar[tuple[int, ...]]
-    cond_shape: AbstractVar[tuple[int, ...] | None]
+    cond_shape: AbstractVar[tuple[int, ...]]
 
     def __init_subclass__(cls) -> None:
         # We wrap the class methods with argument checking
@@ -101,7 +62,7 @@ class AbstractBijection(eqx.Module):
                 setattr(cls, meth, _unwrap_check_and_cast(cls.__dict__[meth]))
 
     @abstractmethod
-    def transform(self, x: Array, condition: Array | None = None) -> Array:
+    def transform(self, x: Array, condition: Array = None) -> Array:
         """Apply the forward transformation.
 
         Args:
@@ -115,7 +76,7 @@ class AbstractBijection(eqx.Module):
     def transform_and_log_det(
         self,
         x: Array,
-        condition: Array | None = None,
+        condition: Array = None,
     ) -> tuple[Array, Array]:
         """Apply transformation and compute the log absolute Jacobian determinant.
 
@@ -125,7 +86,7 @@ class AbstractBijection(eqx.Module):
         """
 
     @abstractmethod
-    def inverse(self, y: Array, condition: Array | None = None) -> Array:
+    def inverse(self, y: Array, condition: Array = None) -> Array:
         """Compute the inverse transformation.
 
         Args:
@@ -138,7 +99,7 @@ class AbstractBijection(eqx.Module):
     def inverse_and_log_det(
         self,
         y: Array,
-        condition: Array | None = None,
+        condition: Array = None,
     ) -> tuple[Array, Array]:
         """Inverse transformation and corresponding log absolute jacobian determinant.
 
@@ -152,6 +113,43 @@ class AbstractBijection(eqx.Module):
     def _vectorize(self):
         # TODO Private for now: perhaps could be made public?
         return _VectorizedBijection(self)
+
+
+def _unwrap_check_and_cast(method):
+    """Decorator that unwraps unwrappables, performs argument casting and checking."""
+
+    @functools.wraps(method)
+    def wrapper(
+        bijection: AbstractBijection,
+        x: ArrayLike,
+        condition: ArrayLike = None,
+    ):
+        # TODO This can be simplified significantly if we use beartype
+        def _check_condition(condition):
+            if condition is not None:
+                condition = arraylike_to_array(condition, err_name="condition")
+            elif bijection.cond_shape is not None:
+                raise ValueError("Expected condition to be provided.")
+
+            if (
+                bijection.cond_shape is not None
+                and condition.shape != bijection.cond_shape
+            ):
+                raise ValueError(
+                    f"Expected condition.shape {bijection.cond_shape}; got "
+                    f"{condition.shape}",
+                )
+            return condition
+
+        def _check_x(x):
+            x = arraylike_to_array(x)
+            if x.shape != bijection.shape:
+                raise ValueError(f"Expected input shape {bijection.shape}; got {x.shape}")
+            return x
+
+        return method(unwrap(bijection), _check_x(x), _check_condition(condition))
+
+    return wrapper
 
 
 class _VectorizedBijection(eqx.Module):

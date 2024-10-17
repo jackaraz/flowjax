@@ -169,15 +169,15 @@ class Vmap(AbstractBijection):
     bijection: AbstractBijection
     in_axes: tuple
     axis_size: int
-    cond_shape: tuple[int, ...] | None
+    cond_shape: tuple[int, ...]
 
     def __init__(
         self,
         bijection: AbstractBijection,
         *,
-        in_axes: PyTree | None | int | Callable = None,
-        axis_size: int | None = None,
-        in_axes_condition: int | None = None,
+        in_axes: Callable = None,
+        axis_size: int = None,
+        in_axes_condition: int = None,
     ):
         if in_axes is not None and axis_size is not None:
             raise ValueError("Cannot specify both in_axes and axis_size.")
@@ -186,9 +186,7 @@ class Vmap(AbstractBijection):
             if in_axes is None:
                 raise ValueError("Either axis_size or in_axes must be provided.")
             _check_no_unwrappables(in_axes)
-            axis_size = _infer_axis_size_from_params(
-                wrappers.unwrap(bijection), in_axes
-            )
+            axis_size = _infer_axis_size_from_params(wrappers.unwrap(bijection), in_axes)
 
         self.in_axes = (in_axes, 0, in_axes_condition)
         self.bijection = bijection
