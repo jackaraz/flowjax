@@ -90,6 +90,7 @@ def fit_to_data(
     val_prop: float = 0.1,
     return_best: bool = True,
     show_progress: bool = True,
+    lr_scheduler=None,
 ):
     r"""Train a PyTree (e.g. a distribution) to samples from the target.
 
@@ -127,7 +128,7 @@ def fit_to_data(
         loss_fn = MaximumLikelihoodLoss()
 
     if optimizer is None:
-        optimizer = optax.adam(learning_rate)
+        optimizer = optax.inject_hyperparams(optax.adam)(learning_rate=learning_rate)
 
     params, static = eqx.partition(
         dist,
@@ -140,11 +141,11 @@ def fit_to_data(
     # train val split
     key, subkey = jr.split(key)
     train_data, val_data = train_val_split(subkey, data, val_prop=val_prop)
-    losses = {"train": [], "val": []}
+    losses = {"train": [], "val": [], "lr": []}
 
     loop = tqdm(range(max_epochs), disable=not show_progress)
 
-    for _ in loop:
+    for epoch in loop:
         # Shuffle data
         key, *subkeys = jr.split(key, 3)
         train_data = [jr.permutation(subkeys[0], a) for a in train_data]
@@ -173,6 +174,10 @@ def fit_to_data(
             loss_i = loss_fn(params, static, *batch, key=subkey)
             batch_losses.append(loss_i)
         losses["val"].append((sum(batch_losses) / len(batch_losses)).item())
+
+        if lr_scheduler is not None:
+            opt_state.hyperparams["learning_rate"] = lr_scheduler(epoch + 1)
+            losses["lr"].append(float(opt_state.hyperparams["learning_rate"]))
 
         loop.set_postfix({k: v[-1] for k, v in losses.items()})
         if losses["val"][-1] == min(losses["val"]):
