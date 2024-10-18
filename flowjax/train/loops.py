@@ -141,7 +141,7 @@ def fit_to_data(
     # train val split
     key, subkey = jr.split(key)
     train_data, val_data = train_val_split(subkey, data, val_prop=val_prop)
-    losses = {"train": [], "val": [], "lr": []}
+    losses = {"train": [], "val": [], "lr": [learning_rate]}
 
     loop = tqdm(range(max_epochs), disable=not show_progress)
 
@@ -185,6 +185,11 @@ def fit_to_data(
 
         elif count_fruitless(losses["val"]) > max_patience:
             loop.set_postfix_str(f"{loop.postfix} (Max patience reached)")
+            break
+        if jnp.any(jnp.isnan(jnp.array(losses["val"] + losses["train"]))) or jnp.any(
+            jnp.isinf(jnp.array(losses["val"] + losses["train"]))
+        ):
+            loop.set_postfix_str(f"{loop.postfix} (inf or nan loss)")
             break
 
     params = best_params if return_best else params
