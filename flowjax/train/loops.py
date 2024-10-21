@@ -86,6 +86,7 @@ def fit_to_data(
     optimizer: optax.GradientTransformation = None,
     max_epochs: int = 100,
     max_patience: int = 5,
+    check_every: int = 1,
     batch_size: int = 100,
     val_prop: float = 0.1,
     return_best: bool = True,
@@ -183,7 +184,11 @@ def fit_to_data(
         if losses["val"][-1] == min(losses["val"]):
             best_params = params
 
-        elif count_fruitless(losses["val"]) > max_patience:
+        elif (
+            count_fruitless(losses["val"]) > max_patience
+            and (epoch + 1) % check_every == 0
+            and epoch > check_every
+        ):
             loop.set_postfix_str(f"{loop.postfix} (Max patience reached)")
             break
         if jnp.any(jnp.isnan(jnp.array(losses["val"] + losses["train"]))) or jnp.any(
