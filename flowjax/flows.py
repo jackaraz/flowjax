@@ -334,11 +334,19 @@ def triangular_spline_flow(
     return Transformed(base_dist, bijection)
 
 
-def _add_default_permute(bijection: AbstractBijection, dim: int, key: PRNGKeyArray):
+def _add_default_permute(
+    bijection: AbstractBijection,
+    dim: int,
+    key: PRNGKeyArray,
+    permutation: jnp.array = None,
+):
     if dim == 1:
         return bijection
     if dim == 2:
         return Chain([bijection, Flip((dim,))]).merge_chains()
 
-    perm = Permute(jr.permutation(key, jnp.arange(dim)))
+    if permutation is None:
+        perm = Permute(jr.permutation(key, jnp.arange(dim)))
+    else:
+        perm = Permute(permutation)
     return Chain([bijection, perm]).merge_chains()
