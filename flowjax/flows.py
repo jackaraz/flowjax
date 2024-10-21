@@ -107,6 +107,8 @@ def masked_autoregressive_flow(
     nn_depth: int = 1,
     nn_activation: Callable = jnn.relu,
     invert: bool = True,
+    return_bijection: bool = False,
+    permutation: jnp.array = None,
 ) -> Transformed:
     """Masked autoregressive flow.
 
@@ -143,10 +145,12 @@ def masked_autoregressive_flow(
             nn_depth=nn_depth,
             nn_activation=nn_activation,
         )
-        return _add_default_permute(bijection, dim, perm_key)
+        return _add_default_permute(bijection, dim, perm_key, permutation)
 
     keys = jr.split(key, flow_layers)
     layers = eqx.filter_vmap(make_layer)(keys)
+    if return_bijection:
+        return Scan(layers)
     bijection = Invert(Scan(layers)) if invert else Scan(layers)
     return Transformed(base_dist, bijection)
 
